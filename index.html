@@ -1,0 +1,143 @@
+<script>
+let engine = "google";
+
+/* NAVIGATION */
+function nav(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('show'));
+  document.getElementById(v).classList.add('show');
+
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  if(v==='vh') nh.classList.add('on');
+  if(v==='vr') nr.classList.add('on');
+  if(v==='vs') ns.classList.add('on');
+
+  if(v==='vr') render();
+}
+
+/* SEARCH */
+function search(q){
+  if(!q) return;
+
+  let url;
+  if(q.startsWith("http") || q.includes(".")){
+    url = q.startsWith("http") ? q : "https://" + q;
+  } else {
+    if(engine==="google"){
+      url = "https://www.google.com/search?q=" + encodeURIComponent(q);
+    } else {
+      url = "https://search.brave.com/search?q=" + encodeURIComponent(q);
+    }
+  }
+
+  nav('vres');
+  document.getElementById("sf").src = url;
+  document.getElementById("rq2").value = q;
+}
+
+/* ENGINE */
+function setEng(e){
+  engine = e;
+  document.getElementById("eg").classList.toggle("on", e==="google");
+  document.getElementById("eb").classList.toggle("on", e==="brave");
+  document.getElementById("se").value = e;
+}
+
+/* GAME SYSTEM */
+function openGame(g){
+  document.getElementById("go").classList.add("show");
+  document.getElementById("gf").src = g.u;
+  document.getElementById("gttl").textContent = g.n;
+  document.getElementById("gcl").textContent = g.c;
+}
+
+function closeGame(){
+  document.getElementById("go").classList.remove("show");
+  document.getElementById("gf").src = "about:blank";
+}
+
+/* RENDER GAMES */
+function render(){
+  const q = document.getElementById("rq").value.toLowerCase();
+  const wrap = document.getElementById("gg");
+  wrap.innerHTML = "";
+
+  let filtered = GAMES.filter(g=>g.n.toLowerCase().includes(q));
+
+  if(filtered.length===0){
+    wrap.innerHTML = `<div class="nores">No games found</div>`;
+    return;
+  }
+
+  filtered.forEach(g=>{
+    let div = document.createElement("div");
+    div.className="gc";
+    div.innerHTML = `
+      <div class="gt">${g.e}</div>
+      <div class="gi">
+        <div class="gn">${g.n}</div>
+        <div class="gcat">${g.c}</div>
+      </div>
+    `;
+    div.onclick = ()=>openGame(g);
+    wrap.appendChild(div);
+  });
+}
+
+/* DISGUISE SYSTEM */
+const PRESETS = [
+  {name:"Google", icon:"https://www.google.com/favicon.ico", title:"Google", url:"https://google.com"},
+  {name:"Classroom", icon:"https://ssl.gstatic.com/classroom/favicon.png", title:"Classes", url:"https://classroom.google.com"},
+  {name:"Drive", icon:"https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png", title:"My Drive", url:"https://drive.google.com"},
+  {name:"Docs", icon:"https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico", title:"Google Docs", url:"https://docs.google.com"}
+];
+
+function applyPreset(p){
+  document.title = p.title;
+  document.getElementById("favicon").href = p.icon;
+  document.getElementById("dlbl").textContent = p.name;
+}
+
+/* SETTINGS APPLY */
+function applyCustom(){
+  let t = document.getElementById("st2").value;
+  let f = document.getElementById("si2").value;
+
+  if(t) document.title = t;
+  if(f) document.getElementById("favicon").href = f;
+}
+
+function resetDis(){
+  document.title = "AETHER";
+  document.getElementById("favicon").href = "";
+  document.getElementById("dlbl").textContent = "None (AETHER)";
+}
+
+/* DROPDOWN */
+function toggleDD(){
+  document.getElementById("dd").classList.toggle("show");
+}
+
+/* LOAD PRESETS */
+function loadPresets(){
+  let wrap = document.getElementById("presets");
+  let dd = document.getElementById("dditems");
+
+  PRESETS.forEach(p=>{
+    let el = document.createElement("div");
+    el.className="pi";
+    el.innerHTML = `<img src="${p.icon}"><span>${p.name}</span>`;
+    el.onclick=()=>applyPreset(p);
+    wrap.appendChild(el);
+
+    let d = document.createElement("div");
+    d.className="ddi";
+    d.innerHTML = `<div class="dico"><img src="${p.icon}"></div>${p.name}`;
+    d.onclick=()=>applyPreset(p);
+    dd.appendChild(d);
+  });
+}
+
+/* INIT */
+loadPresets();
+render();
+</script>
