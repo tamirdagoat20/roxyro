@@ -1,17 +1,18 @@
 <script>
+/* ENGINE */
 let engine = "google";
 
 /* NAVIGATION */
-function nav(v){
-  document.querySelectorAll('.view').forEach(el=>el.classList.remove('show'));
-  document.getElementById(v).classList.add('show');
+function nav(view){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("show"));
+  document.getElementById(view).classList.add("show");
 
-  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  if(v==='vh') nh.classList.add('on');
-  if(v==='vr') nr.classList.add('on');
-  if(v==='vs') ns.classList.add('on');
+  document.querySelectorAll(".nb").forEach(b=>b.classList.remove("on"));
+  if(view==="vh") document.getElementById("nh").classList.add("on");
+  if(view==="vr") document.getElementById("nr").classList.add("on");
+  if(view==="vs") document.getElementById("ns").classList.add("on");
 
-  if(v==='vr') render();
+  if(view==="vr") renderGames();
 }
 
 /* SEARCH */
@@ -19,30 +20,86 @@ function search(q){
   if(!q) return;
 
   let url;
+
   if(q.startsWith("http") || q.includes(".")){
     url = q.startsWith("http") ? q : "https://" + q;
-  } else {
+  }else{
     if(engine==="google"){
-      url = "https://www.google.com/search?q=" + encodeURIComponent(q);
-    } else {
-      url = "https://search.brave.com/search?q=" + encodeURIComponent(q);
+      url = "https://www.google.com/search?q="+encodeURIComponent(q);
+    }else{
+      url = "https://search.brave.com/search?q="+encodeURIComponent(q);
     }
   }
 
-  nav('vres');
+  nav("vres");
   document.getElementById("sf").src = url;
   document.getElementById("rq2").value = q;
 }
 
-/* ENGINE */
+/* ENGINE SWITCH */
 function setEng(e){
   engine = e;
   document.getElementById("eg").classList.toggle("on", e==="google");
   document.getElementById("eb").classList.toggle("on", e==="brave");
-  document.getElementById("se").value = e;
+  let se = document.getElementById("se");
+  if(se) se.value = e;
 }
 
-/* GAME SYSTEM */
+/* GAME DATA */
+const GAMES = [
+ {n:"Slither.io",c:"MULTIPLAYER",e:"🐍",u:"https://slither.io"},
+ {n:"Agar.io",c:"MULTIPLAYER",e:"⚪",u:"https://agar.io"},
+ {n:"Diep.io",c:"MULTIPLAYER",e:"💥",u:"https://diep.io"},
+ {n:"Krunker.io",c:"MULTIPLAYER",e:"🔫",u:"https://krunker.io"},
+ {n:"Skribbl.io",c:"MULTIPLAYER",e:"✏️",u:"https://skribbl.io"},
+ {n:"Zombs.io",c:"MULTIPLAYER",e:"🧟",u:"https://zombs.io"},
+
+ {n:"Flappy Bird",c:"ARCADE",e:"🐦",u:"https://flappybird.io"},
+ {n:"Drift Boss",c:"ARCADE",e:"🚗",u:"https://driftboss.io"},
+ {n:"Slope",c:"ARCADE",e:"⚽",u:"https://slope-game.com"},
+ {n:"Snake",c:"ARCADE",e:"🐍",u:"https://playsnake.org"},
+
+ {n:"2048",c:"PUZZLE",e:"🔢",u:"https://play2048.co"},
+ {n:"Sudoku",c:"PUZZLE",e:"🔣",u:"https://sudoku.com"},
+ {n:"Tetris",c:"PUZZLE",e:"🧩",u:"https://tetris.com/play-tetris"},
+
+ {n:"Chess",c:"CLASSIC",e:"♟️",u:"https://www.chess.com/play/online"},
+ {n:"Minesweeper",c:"CLASSIC",e:"💣",u:"https://minesweeperonline.com"}
+];
+
+/* RENDER GAMES */
+function renderGames(){
+  const q = document.getElementById("rq")?.value?.toLowerCase() || "";
+  const grid = document.getElementById("gg");
+  if(!grid) return;
+
+  grid.innerHTML="";
+
+  let filtered = GAMES.filter(g => g.n.toLowerCase().includes(q));
+
+  if(filtered.length===0){
+    grid.innerHTML = `<div class="nores">No games found</div>`;
+    return;
+  }
+
+  filtered.forEach(g=>{
+    let card = document.createElement("div");
+    card.className="gc";
+
+    card.innerHTML = `
+      <div class="gt">${g.e}</div>
+      <div class="gi">
+        <div class="gn">${g.n}</div>
+        <div class="gcat">${g.c}</div>
+      </div>
+    `;
+
+    card.onclick = ()=>openGame(g);
+    grid.appendChild(card);
+  });
+}
+
+/* OPEN GAME */
 function openGame(g){
   document.getElementById("go").classList.add("show");
   document.getElementById("gf").src = g.u;
@@ -50,54 +107,48 @@ function openGame(g){
   document.getElementById("gcl").textContent = g.c;
 }
 
+/* CLOSE GAME */
 function closeGame(){
   document.getElementById("go").classList.remove("show");
   document.getElementById("gf").src = "about:blank";
 }
 
-/* RENDER GAMES */
-function render(){
-  const q = document.getElementById("rq").value.toLowerCase();
-  const wrap = document.getElementById("gg");
-  wrap.innerHTML = "";
-
-  let filtered = GAMES.filter(g=>g.n.toLowerCase().includes(q));
-
-  if(filtered.length===0){
-    wrap.innerHTML = `<div class="nores">No games found</div>`;
-    return;
-  }
-
-  filtered.forEach(g=>{
-    let div = document.createElement("div");
-    div.className="gc";
-    div.innerHTML = `
-      <div class="gt">${g.e}</div>
-      <div class="gi">
-        <div class="gn">${g.n}</div>
-        <div class="gcat">${g.c}</div>
-      </div>
-    `;
-    div.onclick = ()=>openGame(g);
-    wrap.appendChild(div);
-  });
-}
-
-/* DISGUISE SYSTEM */
+/* DISGUISE PRESETS */
 const PRESETS = [
-  {name:"Google", icon:"https://www.google.com/favicon.ico", title:"Google", url:"https://google.com"},
-  {name:"Classroom", icon:"https://ssl.gstatic.com/classroom/favicon.png", title:"Classes", url:"https://classroom.google.com"},
-  {name:"Drive", icon:"https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png", title:"My Drive", url:"https://drive.google.com"},
-  {name:"Docs", icon:"https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico", title:"Google Docs", url:"https://docs.google.com"}
+{
+name:"Google",
+icon:"https://www.google.com/favicon.ico",
+title:"Google",
+url:"https://google.com"
+},
+{
+name:"Google Classroom",
+icon:"https://ssl.gstatic.com/classroom/favicon.png",
+title:"Classes",
+url:"https://classroom.google.com"
+},
+{
+name:"Google Drive",
+icon:"https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png",
+title:"My Drive",
+url:"https://drive.google.com"
+},
+{
+name:"Google Docs",
+icon:"https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico",
+title:"Google Docs",
+url:"https://docs.google.com"
+}
 ];
 
+/* APPLY PRESET */
 function applyPreset(p){
   document.title = p.title;
   document.getElementById("favicon").href = p.icon;
   document.getElementById("dlbl").textContent = p.name;
 }
 
-/* SETTINGS APPLY */
+/* SETTINGS CUSTOM */
 function applyCustom(){
   let t = document.getElementById("st2").value;
   let f = document.getElementById("si2").value;
@@ -106,10 +157,12 @@ function applyCustom(){
   if(f) document.getElementById("favicon").href = f;
 }
 
+/* RESET */
 function resetDis(){
   document.title = "AETHER";
-  document.getElementById("favicon").href = "";
-  document.getElementById("dlbl").textContent = "None (AETHER)";
+  document.getElementById("favicon").href =
+"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d28d9'/%3E%3C/svg%3E";
+  document.getElementById("dlbl").textContent="None (AETHER)";
 }
 
 /* DROPDOWN */
@@ -117,27 +170,27 @@ function toggleDD(){
   document.getElementById("dd").classList.toggle("show");
 }
 
-/* LOAD PRESETS */
+/* LOAD PRESETS INTO UI */
 function loadPresets(){
-  let wrap = document.getElementById("presets");
-  let dd = document.getElementById("dditems");
+  let presetWrap = document.getElementById("presets");
+  let ddWrap = document.getElementById("dditems");
 
   PRESETS.forEach(p=>{
     let el = document.createElement("div");
     el.className="pi";
-    el.innerHTML = `<img src="${p.icon}"><span>${p.name}</span>`;
+    el.innerHTML=`<img src="${p.icon}"><span>${p.name}</span>`;
     el.onclick=()=>applyPreset(p);
-    wrap.appendChild(el);
+    presetWrap.appendChild(el);
 
     let d = document.createElement("div");
     d.className="ddi";
-    d.innerHTML = `<div class="dico"><img src="${p.icon}"></div>${p.name}`;
+    d.innerHTML=`<div class="dico"><img src="${p.icon}"></div>${p.name}<span class="dck">✔</span>`;
     d.onclick=()=>applyPreset(p);
-    dd.appendChild(d);
+    ddWrap.appendChild(d);
   });
 }
 
 /* INIT */
 loadPresets();
-render();
+renderGames();
 </script>
